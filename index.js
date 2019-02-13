@@ -174,7 +174,7 @@ function parseComment(rawComment) {
                 commentMarkup[i] = commentBody.slice(offset, offset+separator.index);
                 offset += commentMarkup[i].length+separator[0].length;
             } else {
-                commentMarkup[i] = commentBody.slice(offset);
+                commentMarkup[i] = commentBody.substr(offset);
                 break;
             }
         }
@@ -204,7 +204,7 @@ function getCorrectDate(str) {
 
 function parseFile(filePath) {
     let content = readFile(filePath);
-    let lines = content.split(/\n/);
+    let lines = content.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
         let rawComment = getComment(lines[i]);
         if (rawComment) {
