@@ -2,12 +2,10 @@ const { getAllFilePathsWithExtension, readFile, getFileName } = require('./fileS
 const { readLine } = require('./console');
 
 let comments = [];
-const tableSettings = {
-    importanceColumnWidth: 3,
-    userColumnWidth: 6,
-    dateColumnWidth: 6,
-    textColumnWidth: 9,
-    fileNameColumnWidth: 10,
+
+const tables = {
+    full: undefined,
+    important: undefined
 };
 
 app();
@@ -26,18 +24,18 @@ function findAllCommentsInFiles(filePaths) {
 }
 
 
-function getTableHead() {
+function getTableHead(tableOptions) {
     let importanceColumn = '  !  ';
-    let userColumn = `  user${' '.repeat(tableSettings.userColumnWidth-4)}`;
-    let dateColumn = `  date${' '.repeat(tableSettings.dateColumnWidth-4)}`;
-    let textColumn = `  comment${' '.repeat(tableSettings.textColumnWidth-7)}`;
-    let fileNameColumn = `  fileName${' '.repeat(tableSettings.fileNameColumnWidth-8)}`;
+    let userColumn = `  user${' '.repeat(tableOptions.userColumnWidth-4)}`;
+    let dateColumn = `  date${' '.repeat(tableOptions.dateColumnWidth-4)}`;
+    let textColumn = `  comment${' '.repeat(tableOptions.textColumnWidth-7)}`;
+    let fileNameColumn = `  fileName${' '.repeat(tableOptions.fileNameColumnWidth-8)}`;
     return `${importanceColumn}|${userColumn}|${dateColumn}|${textColumn}|${fileNameColumn}`;
 }
 
-function show(comments) {
+function show(comments, tableOptions) {
     let resultSString = [];
-    let tableHead = getTableHead();
+    let tableHead = getTableHead(tableOptions);
     resultSString[resultSString.length] = tableHead;
     let separator = '-'.repeat(tableHead.length);
     resultSString[resultSString.length] = separator;
@@ -49,10 +47,10 @@ function show(comments) {
         let text = getShortcut(comment.text, 50);
         let fileName = getShortcut(comment.fileName, 15);
         importanceColumn = `  ${importance}  `;
-        userColumn = `  ${user}${' '.repeat(tableSettings.userColumnWidth-user.length)}`;
-        dateColumn = `  ${date}${' '.repeat(tableSettings.dateColumnWidth-date.length)}`;
-        textColumn = `  ${text}${' '.repeat(tableSettings.textColumnWidth-text.length)}`;
-        fileNameColumn = `  ${fileName}${' '.repeat(tableSettings.fileNameColumnWidth-fileName.length)}`;
+        userColumn = `  ${user}${' '.repeat(tableOptions.userColumnWidth-user.length)}`;
+        dateColumn = `  ${date}${' '.repeat(tableOptions.dateColumnWidth-date.length)}`;
+        textColumn = `  ${text}${' '.repeat(tableOptions.textColumnWidth-text.length)}`;
+        fileNameColumn = `  ${fileName}${' '.repeat(tableOptions.fileNameColumnWidth-fileName.length)}`;
         resultSString[resultSString.length] = `${importanceColumn}|${userColumn}|${dateColumn}|${textColumn}|${fileNameColumn}`;
     }
     if (resultSString.length > 2) {
@@ -73,14 +71,27 @@ function getShortcut(str, maxLength) {
 function processCommand (command) {
     const commands = command.split(/\s+/);
     let preparedComments = comments.map(value => value);
+    let tableOptions;
     switch (commands[0]) {
         case 'exit':
             process.exit(0);
             break;
         case 'show':
+            if (tables.full === undefined) {
+                tableOptions = getTableOptions(preparedComments);
+                tables.full = tableOptions;
+            } else {
+                tableOptions = tables.full;
+            }
             break;
         case 'important':
             preparedComments = comments.filter(comment => comment.importance);
+            if (!tables.important) {
+                tableOptions = getTableOptions(preparedComments);
+                tables.important = tableOptions;
+            } else {
+                tableOptions = tables.important;
+            }
             break;
         case 'user':
             if (typeof commands[1] === 'undefined') {
@@ -88,6 +99,7 @@ function processCommand (command) {
                 return;
             }
             preparedComments = comments.filter(comment => comment.user.toLowerCase().startsWith(commands[1].toLowerCase()));
+            tableOptions = getTableOptions(preparedComments);
             break;
         case 'date':
             if (typeof commands[1] === 'undefined' || !isCorrectDate(commands[1])) {
@@ -96,6 +108,7 @@ function processCommand (command) {
             }
             let referenceDate = commands[1];
             preparedComments = comments.filter(comment => comment.date.slice(0, referenceDate.length) >= referenceDate);
+            tableOptions = getTableOptions(preparedComments);
             break;
         case 'sort':
             switch (commands[1]) {
@@ -115,13 +128,18 @@ function processCommand (command) {
                     console.log('wrong command');
                     return;
             }
+            if (tables.full === undefined) {
+                tableOptions = getTableOptions(preparedComments);
+                tables.full = tableOptions;
+            } else {
+                tableOptions = tables.full;
+            }
             break;
         default:
             console.log('wrong command');
             return;
     }
-    updateTableSettings(preparedComments);
-    show(preparedComments);
+    show(preparedComments, tableOptions);
 }
 
 function isCorrectDate(str) {
@@ -208,8 +226,14 @@ function parseFile(filePath) {
     }
 }
 
-function updateTableSettings(comms) {
-    resetTableSettings();
+function getTableOptions(comms) {
+    const tableSettings = {
+        importanceColumnWidth: 3,
+        userColumnWidth: 6,
+        dateColumnWidth: 6,
+        textColumnWidth: 9,
+        fileNameColumnWidth: 10,
+    };
     for (let i = 0; i < comms.length; i++) {
         let comment = comms[i];
         tableSettings.userColumnWidth = comment.user.length < 10 ?
@@ -221,14 +245,7 @@ function updateTableSettings(comms) {
         tableSettings.fileNameColumnWidth = comment.fileName.length < 15 ?
             Math.max(comment.fileName.length + 2, tableSettings.fileNameColumnWidth) : 17;
     }
-}
-
-function resetTableSettings() {
-    tableSettings.importanceColumnWidth = 3;
-    tableSettings.userColumnWidth = 6;
-    tableSettings.dateColumnWidth = 6;
-    tableSettings.textColumnWidth = 9;
-    tableSettings.fileNameColumnWidth = 10;
+    return tableSettings;
 }
 
 function getComment(line) {
