@@ -13,9 +13,9 @@ const tableSettings = {
 app();
 
 function app () {
+    console.log('Please, write your command!');
     let filePaths = getAllFilePathsWithExtension(process.cwd(), 'js');
     findAllCommentsInFiles(filePaths);
-    console.log('Please, write your command!');
     readLine(processCommand);
 }
 
@@ -25,11 +25,6 @@ function findAllCommentsInFiles(filePaths) {
     }
 }
 
-function getFiles () {
-    filePaths = getAllFilePathsWithExtension(process.cwd(), 'js');
-
-    return filePaths.map(path => readFile(path));
-}
 
 function getTableHead() {
     let importanceColumn = '  !  ';
@@ -138,7 +133,7 @@ function compareUsers(comment1, comment2) {
     let user2 = comment2.user.toLowerCase();
     return user1 > user2 ? 1
         : user1 < user2 ? -1
-        : 0;
+            : 0;
 }
 
 function compareImportance(comment1, comment2) {
@@ -146,7 +141,7 @@ function compareImportance(comment1, comment2) {
     const importance2 = comment2.importance;
     return importance1 > importance2 ? -1
         : importance1 < importance2 ? 1
-        : 0;
+            : 0;
 }
 
 function compareDates(comment1, comment2) {
@@ -154,11 +149,9 @@ function compareDates(comment1, comment2) {
     const date2 = comment2.date;
     return date1 > date2 ? -1
         : date1 < date2 ? 1
-        : 0;
+            : 0;
 }
 
-// TODO you can do it!
-// todo ds;20f12; может переименовать? ;   fd;    fdddf;;
 function parseComment(rawComment) {
     let commentBody = rawComment.split(/TODO\s*:?\s*/i)[1];
     const comment = {};
@@ -174,7 +167,7 @@ function parseComment(rawComment) {
                 commentMarkup[i] = commentBody.slice(offset, offset+separator.index);
                 offset += commentMarkup[i].length+separator[0].length;
             } else {
-                commentMarkup[i] = commentBody.substr(offset);
+                commentMarkup[i] = commentBody.slice(offset);
                 break;
             }
         }
@@ -186,7 +179,7 @@ function parseComment(rawComment) {
 
     return comment;
 }
-// TODO user; 01.2012; Проверяю разные форматы
+
 function getCorrectDate(str) {
     if (isCorrectDate(str)) {
         return str;
