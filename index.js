@@ -68,15 +68,36 @@ function getShortcut(str, maxLength) {
     return str;
 }
 
+function parseCommand(command) {
+    command = command.trim();
+    let index = command.indexOf(' ');
+    if (index < 0) {
+        return [command]
+    }
+    let mainCommand = command.slice(0, index);
+    let args = command.slice(index).trim();
+
+    return [mainCommand, args]
+}
+
+
 function processCommand (command) {
-    const commands = command.split(/\s+/);
     let preparedComments = comments.map(value => value);
+    let commands = parseCommand(command);
     let tableOptions;
     switch (commands[0]) {
         case 'exit':
+            if (commands.length > 1) {
+                console.log('wrong command');
+                return;
+            }
             process.exit(0);
             break;
         case 'show':
+            if (commands.length > 1) {
+                console.log('wrong command');
+                return;
+            }
             if (tables.full === undefined) {
                 tableOptions = getTableOptions(preparedComments);
                 tables.full = tableOptions;
@@ -85,6 +106,10 @@ function processCommand (command) {
             }
             break;
         case 'important':
+            if (commands.length > 1) {
+                console.log('wrong command');
+                return;
+            }
             preparedComments = comments.filter(comment => comment.importance);
             if (!tables.important) {
                 tableOptions = getTableOptions(preparedComments);
@@ -102,6 +127,10 @@ function processCommand (command) {
             tableOptions = getTableOptions(preparedComments);
             break;
         case 'date':
+            if (commands.length > 2) {
+                console.log('wrong command');
+                return;
+            }
             if (typeof commands[1] === 'undefined' || !isCorrectDate(commands[1])) {
                 console.log('wrong command');
                 return;
@@ -111,6 +140,10 @@ function processCommand (command) {
             tableOptions = getTableOptions(preparedComments);
             break;
         case 'sort':
+            if (commands.length > 2) {
+                console.log('wrong command');
+                return;
+            }
             switch (commands[1]) {
                 case 'user':
                     let commentsWithUser = preparedComments.filter(comment => comment.user.length > 0);
@@ -176,12 +209,12 @@ function parseComment(rawComment) {
     const separatorCount = (commentBody.match(/;/g) || []).length;
     let commentMarkup = new Array(3);
     if (separatorCount < 2) {
-        commentMarkup[2] = commentBody;
+        commentMarkup[2] = commentBody.trim();
     } else {
         let offset = 0;
         for (let i = 0; i < commentMarkup.length; i++) {
             if (i < commentMarkup.length-1) {
-                const separator = commentBody.slice(offset).match(/;\s*/);
+                const separator = commentBody.slice(offset).match(/\s*;\s*/);
                 commentMarkup[i] = commentBody.slice(offset, offset+separator.index);
                 offset += commentMarkup[i].length+separator[0].length;
             } else {
