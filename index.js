@@ -291,11 +291,12 @@ function isInQuotes(line, index) {
     inSingle = false;
     inDouble = false;
     for (let i = 0; i < line.length; i++) {
-        let symbol = line[i];
-        if (symbol === "'" && !inDouble) {
+        const prevSymbol = line.charAt(i-1);
+        const symbol = line.charAt(i);
+        if (symbol === "'" && prevSymbol !== '\\' && !inDouble) {
             inSingle = !inSingle;
         }
-        if (symbol === '"' && !inSingle) {
+        if (symbol === '"' && prevSymbol !== '\\' && !inSingle) {
             inDouble = !inDouble;
         }
         if (i === index) {
