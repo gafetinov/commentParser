@@ -23,7 +23,6 @@ function findAllCommentsInFiles(filePaths) {
     }
 }
 
-
 function getTableHead(tableOptions) {
     let importanceColumn = '  !  ';
     let userColumn = `  user${' '.repeat(tableOptions.userColumnWidth-4)}`;
@@ -80,7 +79,6 @@ function parseCommand(command) {
     return [mainCommand, args]
 }
 
-
 function processCommand (command) {
     let preparedComments = comments.map(value => value);
     let commands = parseCommand(command);
@@ -127,10 +125,6 @@ function processCommand (command) {
             tableOptions = getTableOptions(preparedComments);
             break;
         case 'date':
-            if (commands.length > 2) {
-                console.log('wrong command');
-                return;
-            }
             if (typeof commands[1] === 'undefined' || !isCorrectDate(commands[1])) {
                 console.log('wrong command');
                 return;
@@ -140,10 +134,6 @@ function processCommand (command) {
             tableOptions = getTableOptions(preparedComments);
             break;
         case 'sort':
-            if (commands.length > 2) {
-                console.log('wrong command');
-                return;
-            }
             switch (commands[1]) {
                 case 'user':
                     let commentsWithUser = preparedComments.filter(comment => comment.user.length > 0);
