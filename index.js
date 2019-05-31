@@ -29,6 +29,7 @@ function getTableHead(tableOptions) {
     let dateColumn = `  date${' '.repeat(tableOptions.dateColumnWidth-4)}`;
     let textColumn = `  comment${' '.repeat(tableOptions.textColumnWidth-7)}`;
     let fileNameColumn = `  fileName${' '.repeat(tableOptions.fileNameColumnWidth-8)}`;
+
     return `${importanceColumn}|${userColumn}|${dateColumn}|${textColumn}|${fileNameColumn}`;
 }
 
@@ -268,6 +269,7 @@ function getTableOptions(comms) {
         tableSettings.fileNameColumnWidth = comment.fileName.length < 15 ?
             Math.max(comment.fileName.length + 2, tableSettings.fileNameColumnWidth) : 17;
     }
+
     return tableSettings;
 }
 
